@@ -30,42 +30,42 @@ public:
     SimpleVector() noexcept = default;
 
     explicit SimpleVector(size_t size)
-            :items_(size)
+            :items_(size),
+             size_(size),
+             capacity_(size)
     {
-        size_ = size;
-        capacity_ = size;
         std::fill(begin(), end(), Type());
     }
 
     SimpleVector(size_t size, const Type& value)
-            :items_(size)
+            :items_(size),
+             size_(size),
+             capacity_(size)
     {
-        size_ = size;
-        capacity_ = size;
         std::fill(begin(), end(), value);
     }
 
     SimpleVector(std::initializer_list<Type> init)
-            :items_(init.size())
+            :items_(init.size()),
+             size_(init.size()),
+             capacity_(init.size())
     {
-        size_ = init.size();
-        capacity_ = init.size();
         std::copy(init.begin(), init.end(), begin());
     }
 
     SimpleVector(const SimpleVector& other)
-            :items_(other.GetSize())
+            :items_(other.GetSize()),
+             size_(other.GetSize()),
+             capacity_(other.GetCapacity())
     {
-        size_ = other.GetSize();
-        capacity_ = other.GetCapacity();
         std::copy(other.begin(), other.end(), begin());
     }
 
     SimpleVector(SimpleVector&& other)
-            :items_(other.GetSize())
+            :items_(other.GetSize()),
+             size_(std::move(other.size_)),
+             capacity_(std::move(other.capacity_))
     {
-        size_ = std::move(other.size_);
-        capacity_ = std::move(other.capacity_);
         items_.swap(other.items_);
         other.Clear();
     }
@@ -103,10 +103,12 @@ public:
     }
 
     Type& operator[](size_t index) noexcept {
+        assert(index < GetSize());
         return items_[index];
     }
 
     const Type& operator[](size_t index) const noexcept {
+        assert(index < GetSize());
         return items_[index];
     }
 
@@ -181,7 +183,7 @@ public:
     }
 
     void PopBack() noexcept {
-        if (IsEmpty()) return;
+        assert(IsEmpty());
         --size_;
     }
 
@@ -209,6 +211,7 @@ public:
     }
 
     Iterator Insert(ConstIterator pos, const Type& value) {
+        assert(pos >= begin() && pos < end() + 1);
         size_t index = pos - begin();
         if (size_ < capacity_) {
             if (pos == end()) {
@@ -234,6 +237,7 @@ public:
     }
 
     Iterator Insert(ConstIterator pos, Type&& value) {
+        assert(pos >= begin() && pos < end() + 1);
         size_t index = pos - begin();
         if (size_ < capacity_) {
             if (pos == end()) {
@@ -271,33 +275,28 @@ public:
         capacity_ = new_capacity;
     }
 
-
     Iterator begin() noexcept {
-        return &items_[0];
+        return items_.Get();
     }
 
     Iterator end() noexcept {
-        return &items_[size_];
+        return items_.Get() + size_;
     }
-
 
     ConstIterator begin() const noexcept {
-        return &items_[0];
+        return items_.Get();
     }
-
 
     ConstIterator end() const noexcept {
-        return &items_[size_];
+        return items_.Get() + size_;
     }
-
 
     ConstIterator cbegin() const noexcept {
-        return &items_[0];
+        return items_.Get();
     }
 
-
     ConstIterator cend() const noexcept {
-        return &items_[size_];
+        return items_.Get() + size_;
     }
 
 private:
@@ -313,36 +312,30 @@ lhs.swap(rhs);
 
 template <typename Type>
 inline bool operator==(const SimpleVector<Type>& lhs, const SimpleVector<Type>& rhs) {
-
     return (lhs.GetSize() == rhs.GetSize()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 
 template <typename Type>
 inline bool operator!=(const SimpleVector<Type>& lhs, const SimpleVector<Type>& rhs) {
-
     return !(lhs == rhs);
 }
 
 template <typename Type>
 inline bool operator<(const SimpleVector<Type>& lhs, const SimpleVector<Type>& rhs) {
-
     return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 }
 
 template <typename Type>
 inline bool operator<=(const SimpleVector<Type>& lhs, const SimpleVector<Type>& rhs) {
-
     return (lhs == rhs) || (lhs < rhs);
 }
 
 template <typename Type>
 inline bool operator>(const SimpleVector<Type>& lhs, const SimpleVector<Type>& rhs) {
-
     return rhs < lhs;
 }
 
 template <typename Type>
 inline bool operator>=(const SimpleVector<Type>& lhs, const SimpleVector<Type>& rhs) {
-
     return (lhs == rhs) || (rhs < lhs);
 }
