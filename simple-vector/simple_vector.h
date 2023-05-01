@@ -183,7 +183,7 @@ public:
     }
 
     void PopBack() noexcept {
-        assert(IsEmpty());
+        assert(!IsEmpty());
         --size_;
     }
 
@@ -211,7 +211,7 @@ public:
     }
 
     Iterator Insert(ConstIterator pos, const Type& value) {
-        assert(pos >= begin() && pos < end() + 1);
+        assert(pos >= begin() && pos <= end());
         size_t index = pos - begin();
         if (size_ < capacity_) {
             if (pos == end()) {
@@ -237,7 +237,7 @@ public:
     }
 
     Iterator Insert(ConstIterator pos, Type&& value) {
-        assert(pos >= begin() && pos < end() + 1);
+        assert(pos >= begin() && pos <= end());
         size_t index = pos - begin();
         if (size_ < capacity_) {
             if (pos == end()) {
@@ -327,7 +327,7 @@ inline bool operator<(const SimpleVector<Type>& lhs, const SimpleVector<Type>& r
 
 template <typename Type>
 inline bool operator<=(const SimpleVector<Type>& lhs, const SimpleVector<Type>& rhs) {
-    return (lhs == rhs) || (lhs < rhs);
+    return !(rhs < lhs);
 }
 
 template <typename Type>
@@ -337,5 +337,5 @@ inline bool operator>(const SimpleVector<Type>& lhs, const SimpleVector<Type>& r
 
 template <typename Type>
 inline bool operator>=(const SimpleVector<Type>& lhs, const SimpleVector<Type>& rhs) {
-    return (lhs == rhs) || (rhs < lhs);
+    return !(lhs < rhs);
 }
